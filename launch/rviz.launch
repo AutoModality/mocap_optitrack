@@ -5,16 +5,6 @@
        default="$(find mocap_optitrack)/config/mocap.yaml" />
 
   <node pkg="mocap_optitrack"
-        type="mocap_node"
-        name="mocap_node"
-        respawn="false"
-        launch-prefix=""
-        output="screen"
-        required="true">
-    <rosparam file="$(arg mocap_config_file)" command="load" />
-  </node>
-  
-  <node pkg="mocap_optitrack"
         type="mocap_rviz"
         name="mocap_rviz"
         respawn="false"

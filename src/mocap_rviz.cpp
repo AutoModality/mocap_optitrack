@@ -1,7 +1,11 @@
 // ROS includes
 #include <ros/ros.h>
 #include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
+//#include <tf2/transform_broadcaster.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <geometry_msgs/TransformStamped.h>
+
 #include <geometry_msgs/PoseStamped.h>
 //#include <geometry_msgs/Pose2D.h>
 #include <visualization_msgs/Marker.h>
@@ -13,6 +17,32 @@
 visualization_msgs::Marker marker;
 ros::Publisher rviz_uav_marker_pub;
 ros::Publisher rviz_target_marker_pub;
+
+void publishUAVTransform(const geometry_msgs::PoseStamped::ConstPtr &msg) {
+    static tf2_ros::TransformBroadcaster drone_br;
+    geometry_msgs::TransformStamped transformStamped;
+
+    transformStamped.header.stamp = ros::Time::now();
+    transformStamped.header.frame_id = "Building_0";
+    transformStamped.child_frame_id = "Drone_MC";
+    transformStamped.transform.translation.x = msg->pose.position.x;
+    transformStamped.transform.translation.y = msg->pose.position.y;
+    transformStamped.transform.translation.z = msg->pose.position.z;
+    transformStamped.transform.rotation.x = msg->pose.orientation.x;
+    transformStamped.transform.rotation.y = msg->pose.orientation.y;
+    transformStamped.transform.rotation.z = msg->pose.orientation.z;
+    transformStamped.transform.rotation.w = msg->pose.orientation.w;
+    double r,p,y;
+    tf::Quaternion q(msg->pose.orientation.x, msg->pose.orientation.y,
+            msg->pose.orientation.z, msg->pose.orientation.w);
+    tf::Matrix3x3 m;
+    m.setRotation(q);
+    m.getRPY(r,p,y);
+    ROS_INFO("R[%0.3f], P[%0.3f], Y[%0.3f]",
+            r*180/3.14159, p*180/3.14159, y*180/3.14159);
+
+    drone_br.sendTransform(transformStamped);
+}
 
 void publishUAVMarker(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     // Send the current location to RVIZ
@@ -117,12 +147,15 @@ void publishTargetMarker(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 void dronePoseCB(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 //    ROS_INFO("GOT drone pose");
 //    publishUAVMarker(msg);
-    publishTargetMarker(msg);
+    publishUAVMarker(msg);
+    publishUAVTransform(msg);
+
     return;
 }
 
 void targetPoseCB(const geometry_msgs::PoseStamped::ConstPtr &msg) {
-    ROS_INFO("GOT target pose");
+//    ROS_INFO("GOT target pose");
+    publishUAVTransform(msg);
     return;
 }
 

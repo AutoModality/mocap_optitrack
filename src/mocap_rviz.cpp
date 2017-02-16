@@ -38,8 +38,8 @@ void publishUAVTransform(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     tf::Matrix3x3 m;
     m.setRotation(q);
     m.getRPY(r,p,y);
-    ROS_INFO("R[%0.3f], P[%0.3f], Y[%0.3f]",
-            r*180/3.14159, p*180/3.14159, y*180/3.14159);
+//    ROS_INFO_THROTTLE(1, "R[%0.3f], P[%0.3f], Y[%0.3f]",
+//            r*180/3.14159, p*180/3.14159, y*180/3.14159);
 
     drone_br.sendTransform(transformStamped);
 }
